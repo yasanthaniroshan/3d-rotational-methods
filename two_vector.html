@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Rotation Simulation - Two Vector Representation</title>
+    <style>
+        body { margin: 0; }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="vector1X">Vector 1 X:</label>
+        <input type="number" id="vector1X" step="0.1" value="1">
+        <label for="vector1Y">Y:</label>
+        <input type="number" id="vector1Y" step="0.1" value="0">
+        <label for="vector1Z">Z:</label>
+        <input type="number" id="vector1Z" step="0.1" value="0">
+        <br>
+        <label for="vector2X">Vector 2 X:</label>
+        <input type="number" id="vector2X" step="0.1" value="0">
+        <label for="vector2Y">Y:</label>
+        <input type="number" id="vector2Y" step="0.1" value="1">
+        <label for="vector2Z">Z:</label>
+        <input type="number" id="vector2Z" step="0.1" value="0">
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
+
+        // Set up scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a cube skeleton
+        const geometry = new THREE.BoxGeometry();
+        const edges = new THREE.WireframeGeometry(geometry);
+        const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.LineSegments(edges, material);
+        scene.add(cube);
+
+        // Create axes
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        // Set camera position and look-at point
+        camera.position.set(2, 2, 2);
+        camera.lookAt(0, 0, 0);
+
+        // Add event listeners for input changes
+        const vector1XInput = document.getElementById('vector1X');
+        const vector1YInput = document.getElementById('vector1Y');
+        const vector1ZInput = document.getElementById('vector1Z');
+
+        const vector2XInput = document.getElementById('vector2X');
+        const vector2YInput = document.getElementById('vector2Y');
+        const vector2ZInput = document.getElementById('vector2Z');
+
+        vector1XInput.addEventListener('input', updateQuaternion);
+        vector1YInput.addEventListener('input', updateQuaternion);
+        vector1ZInput.addEventListener('input', updateQuaternion);
+
+        vector2XInput.addEventListener('input', updateQuaternion);
+        vector2YInput.addEventListener('input', updateQuaternion);
+        vector2ZInput.addEventListener('input', updateQuaternion);
+
+        function updateQuaternion() {
+            const vector1 = new THREE.Vector3(parseFloat(vector1XInput.value), parseFloat(vector1YInput.value), parseFloat(vector1ZInput.value));
+            const vector2 = new THREE.Vector3(parseFloat(vector2XInput.value), parseFloat(vector2YInput.value), parseFloat(vector2ZInput.value));
+
+            // Calculate rotation axis as cross product
+            const rotationAxis = new THREE.Vector3().crossVectors(vector1, vector2).normalize();
+
+            // Calculate rotation angle as the angle between vectors
+            const cosTheta = vector1.dot(vector2) / (vector1.length() * vector2.length());
+            const rotationAngle = Math.acos(THREE.MathUtils.clamp(cosTheta, -1, 1));
+
+            // Create quaternion based on axis and angle
+            const quaternion = new THREE.Quaternion().setFromAxisAngle(rotationAxis, rotationAngle);
+
+            // Set cube rotation based on quaternion
+            cube.quaternion.copy(quaternion);
+        }
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Call the animate function
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>3D Rotation Simulation</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      label {
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
+
+      // Initialize scene, camera, and renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Create a cube
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: true,
+      });
+      const cube = new THREE.Mesh(geometry, material);
+      scene.add(cube);
+
+      // Add origin axes
+      const axesHelper = new THREE.AxesHelper(2);
+      scene.add(axesHelper);
+
+      // Function to update cube rotation based on input matrices
+      function updateRotation(rotationMatrix) {
+        const matrix = new THREE.Matrix4();
+        matrix.set(
+          rotationMatrix[0][0],
+          rotationMatrix[0][1],
+          rotationMatrix[0][2],
+          0,
+          rotationMatrix[1][0],
+          rotationMatrix[1][1],
+          rotationMatrix[1][2],
+          0,
+          rotationMatrix[2][0],
+          rotationMatrix[2][1],
+          rotationMatrix[2][2],
+          0,
+          0,
+          0,
+          0,
+          1
+        );
+
+        cube.applyMatrix4(matrix);
+      }
+
+      // Function to handle user input and update rotation matrix
+      function handleInput() {
+        const rotationMatrix = [
+          [parseFloat(document.getElementById("m11").value), parseFloat(document.getElementById("m12").value), parseFloat(document.getElementById("m13").value)],
+          [parseFloat(document.getElementById("m21").value), parseFloat(document.getElementById("m22").value), parseFloat(document.getElementById("m23").value)],
+          [parseFloat(document.getElementById("m31").value), parseFloat(document.getElementById("m32").value), parseFloat(document.getElementById("m33").value)],
+        ];
+
+        // Update cube rotation
+        updateRotation(rotationMatrix);
+      }
+
+      // Listen for input changes
+      for (let i = 1; i <= 3; i++) {
+        for (let j = 1; j <= 3; j++) {
+          const inputId = `m${i}${j}`;
+          const inputElement = document.getElementById(inputId);
+          inputElement.addEventListener("input", handleInput);
+        }
+      }
+
+      // Adjust camera position to view Z-axis
+      camera.position.set(2, 2, 5);
+      camera.lookAt(0, 0, 0);
+
+      // Render loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Render scene
+        renderer.render(scene, camera);
+      }
+
+      // Start animation loop
+      animate();
+    </script>
+    <div style="position: absolute; top: 10px; left: 10px;">
+      <label for="m11">Matrix Element m11:</label>
+      <input type="number" id="m11" step="0.1" value="1" />
+      <label for="m12">Matrix Element m12:</label>
+      <input type="number" id="m12" step="0.1" value="0" />
+      <label for="m13">Matrix Element m13:</label>
+      <input type="number" id="m13" step="0.1" value="0" />
+      <br />
+      <label for="m21">Matrix Element m21:</label>
+      <input type="number" id="m21" step="0.1" value="0" />
+      <label for="m22">Matrix Element m22:</label>
+      <input type="number" id="m22" step="0.1" value="1" />
+      <label for="m23">Matrix Element m23:</label>
+      <input type="number" id="m23" step="0.1" value="0" />
+      <br />
+      <label for="m31">Matrix Element m31:</label>
+      <input type="number" id="m31" step="0.1" value="0" />
+      <label for="m32">Matrix Element m32:</label>
+      <input type="number" id="m32" step="0.1" value="0" />
+      <label for="m33">Matrix Element m33:</label>
+      <input type="number" id="m33" step="0.1" value="1" />
+    </div>
+  </body>
+</html>

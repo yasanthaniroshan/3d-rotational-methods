@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Rotation Simulation - Axis and Angle Representation</title>
+    <style>
+        body { margin: 0; }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="axisX">Axis X:</label>
+        <input type="number" id="axisX" step="0.1" value="1">
+        <label for="axisY">Y:</label>
+        <input type="number" id="axisY" step="0.1" value="0">
+        <label for="axisZ">Z:</label>
+        <input type="number" id="axisZ" step="0.1" value="0">
+        <br>
+        <label for="angle">Rotation Angle:</label>
+        <input type="number" id="angle" step="0.1" value="0">
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
+
+        // Set up scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a cube skeleton
+        const geometry = new THREE.BoxGeometry();
+        const edges = new THREE.WireframeGeometry(geometry);
+        const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.LineSegments(edges, material);
+        scene.add(cube);
+
+        // Create axes
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        // Set camera position and look-at point
+        camera.position.set(2, 2, 2);
+        camera.lookAt(0, 0, 0);
+
+        // Add event listeners for input changes
+        const axisXInput = document.getElementById('axisX');
+        const axisYInput = document.getElementById('axisY');
+        const axisZInput = document.getElementById('axisZ');
+        const angleInput = document.getElementById('angle');
+
+        axisXInput.addEventListener('input', updateQuaternion);
+        axisYInput.addEventListener('input', updateQuaternion);
+        axisZInput.addEventListener('input', updateQuaternion);
+        angleInput.addEventListener('input', updateQuaternion);
+
+        function updateQuaternion() {
+            const axisX = parseFloat(axisXInput.value);
+            const axisY = parseFloat(axisYInput.value);
+            const axisZ = parseFloat(axisZInput.value);
+            const angle = parseFloat(angleInput.value);
+
+            // Create quaternion based on input values
+            const rotationAxis = new THREE.Vector3(axisX, axisY, axisZ).normalize();
+            const quaternion = new THREE.Quaternion().setFromAxisAngle(rotationAxis, angle);
+
+            // Set cube rotation based on quaternion
+            cube.quaternion.copy(quaternion);
+        }
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Call the animate function
+        animate();
+    </script>
+</body>
+</html>

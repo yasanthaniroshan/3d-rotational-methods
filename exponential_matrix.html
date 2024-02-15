@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Rotation Simulation - Matrix Exponential Method</title>
+    <style>
+        body { margin: 0; }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="m11">m11:</label>
+        <input type="number" id="m11" step="0.1" value="1">
+        <label for="m12">m12:</label>
+        <input type="number" id="m12" step="0.1" value="0">
+        <label for="m13">m13:</label>
+        <input type="number" id="m13" step="0.1" value="0">
+        <br>
+        <label for="m21">m21:</label>
+        <input type="number" id="m21" step="0.1" value="0">
+        <label for="m22">m22:</label>
+        <input type="number" id="m22" step="0.1" value="1">
+        <label for="m23">m23:</label>
+        <input type="number" id="m23" step="0.1" value="0">
+        <br>
+        <label for="m31">m31:</label>
+        <input type="number" id="m31" step="0.1" value="0">
+        <label for="m32">m32:</label>
+        <input type="number" id="m32" step="0.1" value="0">
+        <label for="m33">m33:</label>
+        <input type="number" id="m33" step="0.1" value="1">
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js';
+
+        // Set up scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a cube skeleton
+        const geometry = new THREE.BoxGeometry();
+        const edges = new THREE.WireframeGeometry(geometry);
+        const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.LineSegments(edges, material);
+        scene.add(cube);
+
+        // Create axes
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        // Set camera position and look-at point
+        camera.position.set(2, 2, 2);
+        camera.lookAt(0, 0, 0);
+
+        // Add event listeners for input changes
+        const m11Input = document.getElementById('m11');
+        const m12Input = document.getElementById('m12');
+        const m13Input = document.getElementById('m13');
+        const m21Input = document.getElementById('m21');
+        const m22Input = document.getElementById('m22');
+        const m23Input = document.getElementById('m23');
+        const m31Input = document.getElementById('m31');
+        const m32Input = document.getElementById('m32');
+        const m33Input = document.getElementById('m33');
+
+        m11Input.addEventListener('input', updateRotation);
+        m12Input.addEventListener('input', updateRotation);
+        m13Input.addEventListener('input', updateRotation);
+        m21Input.addEventListener('input', updateRotation);
+        m22Input.addEventListener('input', updateRotation);
+        m23Input.addEventListener('input', updateRotation);
+        m31Input.addEventListener('input', updateRotation);
+        m32Input.addEventListener('input', updateRotation);
+        m33Input.addEventListener('input', updateRotation);
+
+        function updateRotation() {
+            const m11 = parseFloat(m11Input.value);
+            const m12 = parseFloat(m12Input.value);
+            const m13 = parseFloat(m13Input.value);
+            const m21 = parseFloat(m21Input.value);
+            const m22 = parseFloat(m22Input.value);
+            const m23 = parseFloat(m23Input.value);
+            const m31 = parseFloat(m31Input.value);
+            const m32 = parseFloat(m32Input.value);
+            const m33 = parseFloat(m33Input.value);
+
+            // Create rotation matrix
+            const rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.set(
+                m11, m12, m13, 0,
+                m21, m22, m23, 0,
+                m31, m32, m33, 0,
+                0, 0, 0, 1
+            );
+
+            // Apply matrix exponential
+            const rotationQuaternion = new THREE.Quaternion().setFromRotationMatrix(rotationMatrix);
+            const matrixExponential = new THREE.Matrix4().makeRotationFromQuaternion(rotationQuaternion);
+
+            // Set cube rotation based on matrix exponential
+            cube.quaternion.setFromRotationMatrix(matrixExponential);
+        }
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Call the animate function
+        animate();
+    </script>
+</body>
+</html>

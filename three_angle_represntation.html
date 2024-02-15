@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Rotation Simulation</title>
+    <style>
+        body { margin: 0; }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="angleX">X Angle:</label>
+        <input type="range" id="angleX" min="-Math.PI" max="Math.PI" step="0.01" value="0">
+        <br>
+        <label for="angleY">Y Angle:</label>
+        <input type="range" id="angleY" min="-Math.PI" max="Math.PI" step="0.01" value="0">
+        <br>
+        <label for="angleZ">Z Angle:</label>
+        <input type="range" id="angleZ" min="-Math.PI" max="Math.PI" step="0.01" value="0">
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://threejs.org/build/three.module.js';
+
+        // Set up scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a cube skeleton
+        const geometry = new THREE.BoxGeometry();
+        const edges = new THREE.WireframeGeometry(geometry);
+        const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.LineSegments(edges, material);
+        scene.add(cube);
+
+        // Create axes
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        // Set camera position and look-at point
+        camera.position.set(2, 2, 2);
+        camera.lookAt(0, 0, 0);
+
+        // Add event listeners for input changes
+        const angleXInput = document.getElementById('angleX');
+        const angleYInput = document.getElementById('angleY');
+        const angleZInput = document.getElementById('angleZ');
+
+        angleXInput.addEventListener('input', updateRotation);
+        angleYInput.addEventListener('input', updateRotation);
+        angleZInput.addEventListener('input', updateRotation);
+
+        function updateRotation() {
+            const angleX = parseFloat(angleXInput.value);
+            const angleY = parseFloat(angleYInput.value);
+            const angleZ = parseFloat(angleZInput.value);
+
+            // Set cube rotation based on input values
+            cube.rotation.set(angleX, angleY, angleZ);
+        }
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Call the animate function
+        animate();
+    </script>
+</body>
+</html>
